@@ -22,6 +22,15 @@
 <!-- Templates -->
 <script type="text/ng-template" id="/patients.html">
 
+    <style>
+        h1 {
+            background-color: #88a3ff;
+            color: white;
+            padding-top: 20px;
+        }
+    </style>
+    <h1>Visit Tracker</h1>
+
     <table class="table table-striped">
         <tr>
             <td>
@@ -48,14 +57,19 @@
                 </div>
             </td>
             <td>
-                <label class="col control-label">&nbsp;</label>
+                <label class="col control-label">Add Patients:</label>
+                <div class="col">
+                    <button class="btn" ng-click="addPatient()">
+                        <span class="glyphicon glyphicon-list"></span> Add
+                    </button>
+                </div>
             </td>
         </tr>
     </table>
 
     <table class="table table-striped">
         <thead>
-        <tr>
+        <tr class = "header">
             <th>Log Visit</th>
             <th>Active?</th>
             <th>First Name</th>
@@ -161,6 +175,7 @@
 
 <script type="text/ng-template" id="/visits.html">
 
+    <h1>Visit Tracker</h1>
     <table class="table table-striped">
         <tr>
             <td>
@@ -226,6 +241,60 @@
             </td>
         </tr>
     </table>
+</script>
+
+<script type="text/ng-template" id="/addpatient.html">
+
+    <h1>Visit Tracker</h1>
+
+    <label class="col control-label">Back:</label>
+    <div class="col">
+        <button class="btn" ng-click="backHome()">
+            <span class="glyphicon glyphicon-chevron-left"></span>
+        </button>
+    </div>
+
+    <div class="form-group">
+        <label class="col control-label">First Name:</label>
+        <div class="col">
+            <input type="text" ng-model="firstName" placeholder="First Name">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col control-label">Last Name:</label>
+        <div class="col">
+            <input type="text" ng-model="lastName" placeholder="Last Name">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col control-label">Patient ID:</label>
+        <div class="col">
+            <input type="text" ng-model="patientId" placeholder="Patient ID">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col control-label">Agency:</label>
+        <div class="col">
+            <input type="text" ng-model="agency" placeholder="Agency">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col control-label">Active:</label>
+        <div class="col">
+            <label class="switch">
+                <input type="checkbox" ng-model="active">
+                <div class="slider round"></div>
+            </label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col">
+            <button class="btn btn-success" ng-click="save()">
+                <span class="glyphicon glyphicon-user"></span> Add Patient
+            </button>
+        </div>
+    </div>
+
 </script>
 
 <!-- DOWNLOAD CSV CODE start -->
@@ -373,11 +442,17 @@
                 window.location.reload(true);
             }
 
+            $scope.addPatient = function() {
+                window.location="#/addpatient";
+                window.location.reload(true);
+            }
+
             $scope.resetSearch = function(){
                 if (!$scope.search.active) {
                     $scope.search.active = "";
                 }
             }
+
         }])
 
         .controller('VisitLoggingCtrl', ['$scope', '$routeParams', 'Patients', '$location', function ($scope, $routeParams, Patients, $location) {
@@ -404,6 +479,14 @@
                 window.location="/";
             }
         }])
+
+        .controller('AddPatientCtrl', ['$scope', '$routeParams', 'Patients', '$location', function ($scope, $routeParams, Patients, $location) {
+            $scope.patients = Patients.query();
+
+            $scope.backHome = function(){
+                window.location="/";
+            }
+        }])
         //---------------
         // Routes
         //---------------
@@ -423,6 +506,11 @@
                 .when('/visits', {
                     templateUrl: '/visits.html',
                     controller: 'VisitsCtrl'
+                })
+
+                .when('/addpatient', {
+                    templateUrl: '/addpatient.html',
+                    controller: 'AddPatientCtrl'
                 });
         }]);
 </script>
