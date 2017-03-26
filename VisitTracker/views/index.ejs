@@ -22,13 +22,6 @@
 <!-- Templates -->
 <script type="text/ng-template" id="/patients.html">
 
-    <style>
-        h1 {
-            background-color: #88a3ff;
-            color: white;
-            padding-top: 20px;
-        }
-    </style>
     <h1>Visit Tracker</h1>
 
     <table class="table table-striped">
@@ -60,7 +53,7 @@
                 <label class="col control-label">Add Patients:</label>
                 <div class="col">
                     <button class="btn" ng-click="addPatient()">
-                        <span class="glyphicon glyphicon-list"></span> Add
+                        <span class="glyphicon glyphicon-plus"></span> Add
                     </button>
                 </div>
             </td>
@@ -101,48 +94,6 @@
         </tbody>
     </table>
 
-    <hr>
-
-    <div class="form-group">
-        <label class="col control-label">First Name:</label>
-        <div class="col">
-            <input type="text" ng-model="firstName" placeholder="First Name">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col control-label">Last Name:</label>
-        <div class="col">
-            <input type="text" ng-model="lastName" placeholder="Last Name">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col control-label">Patient ID:</label>
-        <div class="col">
-            <input type="text" ng-model="patientId" placeholder="Patient ID">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col control-label">Agency:</label>
-        <div class="col">
-            <input type="text" ng-model="agency" placeholder="Agency">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col control-label">Active:</label>
-        <div class="col">
-            <label class="switch">
-                <input type="checkbox" ng-model="active">
-                <div class="slider round"></div>
-            </label>
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col">
-            <button class="btn btn-success" ng-click="save()">
-                <span class="glyphicon glyphicon-user"></span> Add Patient
-            </button>
-        </div>
-    </div>
 </script>
 
 <script type="text/ng-template" id="/visitLogging.html">
@@ -171,6 +122,11 @@
     <button class="btn btn-info" ng-click="cancel()">
         <span class="glyphicon glyphicon-user"></span> Cancel
     </button>
+
+    <div class="alert alert-success" ng-show="showSuccessAlert">
+        <button type="button" class="close" data-ng-click="switchBool('showSuccessAlert')" >×</button>
+        <strong>Done!</strong> {{successTextAlert}}
+    </div>
 </script>
 
 <script type="text/ng-template" id="/visits.html">
@@ -244,16 +200,7 @@
 </script>
 
 <script type="text/ng-template" id="/addpatient.html">
-
     <h1>Visit Tracker</h1>
-
-    <label class="col control-label">Back:</label>
-    <div class="col">
-        <button class="btn" ng-click="backHome()">
-            <span class="glyphicon glyphicon-chevron-left"></span>
-        </button>
-    </div>
-
     <div class="form-group">
         <label class="col control-label">First Name:</label>
         <div class="col">
@@ -292,9 +239,15 @@
             <button class="btn btn-success" ng-click="save()">
                 <span class="glyphicon glyphicon-user"></span> Add Patient
             </button>
+            <button class="btn btn-info" ng-click="cancel()">
+                <span class="glyphicon glyphicon-user"></span> Close
+            </button>
         </div>
-    </div>
 
+        <div class="alert alert-success" ng-show="showSuccessAlert">
+            <button type="button" class="close" data-ng-click="switchBool('showSuccessAlert')" >×</button>
+            <strong>Done!</strong> {{successTextAlert}}
+        </div>
 </script>
 
 <!-- DOWNLOAD CSV CODE start -->
@@ -427,10 +380,13 @@
             }
 
             $scope.remove = function(index){
-                var patient = $scope.patients[index];
-                Patients.remove({id: patient._id}, function(){
-                    $scope.patients.splice(index, 1);
-                });
+                var r = confirm("Are you sure you want to delete this patient?");
+                if (r != false) {
+                    var patient = $scope.patients[index];
+                    Patients.remove({id: patient._id}, function () {
+                        $scope.patients.splice(index, 1);
+                    });
+                }
             }
 
             $scope.logVisit = function(id){
@@ -483,7 +439,34 @@
         .controller('AddPatientCtrl', ['$scope', '$routeParams', 'Patients', '$location', function ($scope, $routeParams, Patients, $location) {
             $scope.patients = Patients.query();
 
-            $scope.backHome = function(){
+            $scope.save = function(){
+                if(!$scope.firstName || $scope.firstName.length < 1) return;
+                var patient = new Patients({
+                    firstName: $scope.firstName,
+                    lastName: $scope.lastName,
+                    patientId: $scope.patientId,
+                    active: $scope.active,
+                    agency: $scope.agency
+                });
+
+                patient.$save(function(){
+                    $scope.patients.push(patient);
+                    $scope.firstName = '';
+                    $scope.lastName = '';
+                    $scope.patientId = '';
+                    $scope.active = '';
+                    $scope.agency = '';
+
+                    $scope.successTextAlert = "Patient Added successfully";
+                    $scope.showSuccessAlert = true;
+
+                    $scope.switchBool = function(value) {
+                        $scope[value] = !$scope[value];
+                    };
+                })
+            }
+
+            $scope.cancel = function(){
                 window.location="/";
             }
         }])
